@@ -1,3 +1,5 @@
+# !!!THIS IS STILL WIP!!!
+
 # vRP Mining Job
 
 This is a mining job for the vrp2 framework for FiveM. The job allows the player to collect stones and ores, and smelt them into materials to sell.

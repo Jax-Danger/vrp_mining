@@ -19,9 +19,13 @@ local function mineRock(self)
 end
 
 function MiningJob:mineRocks()
-  local user = vRP.users_by_source[source]
-  if user then
-    return user:openMenu('rockquarry')
+  local group = vRP.EXT.Group:getUsersByGroup('miner')
+  for k, v in pairs(group) do
+    if v.source == source then
+      return user:openMenu('rockquarry')
+    else
+      return vRP.EXT.Base.remote._notify(source, "You must be a miner to mine rocks.")
+    end
   end
 end
 MiningJob.tunnel.mineRocks = MiningJob.mineRocks

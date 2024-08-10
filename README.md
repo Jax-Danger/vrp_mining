@@ -12,7 +12,7 @@ This is a mining job for the vrp2 framework for FiveM. The job allows the player
 # Installation
 
 - Download script via releases
-- Extract script to resources folder, ensuring the name remains "vrp_miningJob".
+- Extract script to resources folder, ensuring the name remains "vrp_mining".
 - Ensure the script in server cfg file.
 - Restart server
 

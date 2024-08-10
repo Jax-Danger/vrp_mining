@@ -15,12 +15,8 @@ This is a mining job for the vrp2 framework for FiveM. The job allows the player
 - Extract script to resources folder, ensuring the name remains "vrp_mining".
 - Ensure the script in server cfg file.
 - Navigate to vrp/cfg/groups.lua, and create a group called 'miner' using the following code:
-  ```  ['miner'] = {
-    _config = {
-      title = "Miner",
-      gtype = "job"
-    },
-  }
+  ```
+  ['miner'] = {_config = {title = "Miner", gtype = "job"}}
 - Restart server
 
 # Configuration

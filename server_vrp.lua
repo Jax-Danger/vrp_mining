@@ -5,5 +5,5 @@ local vRP = Proxy.getInterface("vRP")
 
 
 async(function()
-  vRP.loadScript("vrp_template", "server")		-- change vrp_tutorial to file name of mod
+  vRP.loadScript("vrp_mining", "server")
 end)

@@ -25,4 +25,4 @@ To configure the script, navigate to the cfg/cfg.lua file, and change anything y
 
 # Support
 
-Feel free to join my discord for support:
+Feel free to join my discord for support:https://discord.gg/GZVTe2WNeF

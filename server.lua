@@ -19,6 +19,7 @@ local function mineRock(self)
 end
 
 function MiningJob:mineRocks()
+  local user = vRP.users_by_source[source]
   local group = vRP.EXT.Group:getUsersByGroup('miner')
   for k, v in pairs(group) do
     if v.source == source then

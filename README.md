@@ -20,7 +20,7 @@ This is a mining job for the vrp2 framework for FiveM. The job allows the player
       title = "Miner",
       gtype = "job"
     },
-  }```
+  }
 - Restart server
 
 # Configuration

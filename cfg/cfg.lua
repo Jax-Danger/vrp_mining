@@ -2,6 +2,7 @@ local cfg = {}
 
 cfg.blips = {
   {name="Rock Quarry", id=527, size=0.85, color=2, coords={2942.82, 2785.14, 39.81}},
+  {name="Smelt Ores", id=527, size=0.85, color=54, coords={1088.83, -1992.99, 30.97}}
 }
 
 cfg.rocks = {
@@ -19,14 +20,27 @@ cfg.rocks = {
   {2969.0908, 2776.5581, 38.383}
 }
 
-cfg.chances = {
-  ["rock"] = {min=1, max=2},
-  ["gold_ore"] = {min=1, max=2},
-  ["iron_ore"] = {min=1, max=2},
+cfg.smelting = {
+  coords={1113.3628, -2005.5374, 35.4394},
+  {
+    input='iron_ore',
+    inamount=3,
+    output='iron_processed',
+    outamount=1
+  },
+  {
+    input='gold_ore',
+    inamount=3,
+    output='gold_processed',
+    outamount=1
+  },
 }
 
-cfg.smelting = {
-  {name="Smelt rocks", input="rock", inputAmount=5, output={"iron_ore"}, outputAmount=1},
+cfg.useNPC = true
+cfg.NPC = {
+  model = 's_m_m_autoshop_01',
+  coords = {2677.3484, 2791.0667, 40.5186},
+  heading = 94.2064
 }
 
 return cfg

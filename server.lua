@@ -6,23 +6,29 @@ local function mineRock(self)
   local user = vRP.users_by_source[source]
   if user then
     local itemType = "rock"
-    local chanceConfig = self.cfg.items[itemType]
+    local smeltingConfig = self.cfg.smelting
 
-    if chanceConfig then
-      local randomNumber = math.random(chanceConfig.min, chanceConfig.max)
-      user:tryGiveItem(itemType, randomNumber, false, false)
-      vRP.EXT.Base.remote._notify(user.source, "You've gathered some " .. itemType .. ".")
-    else
+    if smeltingConfig then
+      for _, item in ipairs(smeltingConfig) do
+        if item.input == itemType then
+          local randomNumber = math.random(item.inamount, item.outamount)
+          user:tryGiveItem(item.output, randomNumber, false, false)
+          vRP.EXT.Base.remote._notify(user.source, "You've gathered some " .. item.output .. ".")
+          return
+        end
+      end
       vRP.EXT.Base.remote._notify(user.source, "Invalid item type.")
+    else
+      vRP.EXT.Base.remote._notify(user.source, "Smelting configuration not found.")
     end
   end
 end
 function MiningJob:mineRocks()
   local user = vRP.users_by_source[source]
-  local group = vRP.EXT.Group:getUsersByGroup('miner')
+  local group = vRP.EXT.Group:getUsersByGroup("miner")
   for k, v in pairs(group) do
     if v.source == source then
-      return user:openMenu('rockquarry')
+      return user:openMenu("rockquarry")
     else
       return vRP.EXT.Base.remote._notify(source, "You must be a miner to mine rocks.")
     end
@@ -39,12 +45,12 @@ MiningJob.tunnel.stopMining = MiningJob.stopMining
 
 -- Smelting/ Processing Ores
 function MiningJob:startSmelting()
-  print('called.')
+  print("called.")
   local user = vRP.users_by_source[source]
-  local group = vRP.EXT.Group:getUsersByGroup('miner')
+  local group = vRP.EXT.Group:getUsersByGroup("miner")
   for k, v in pairs(group) do
     if v.source == source then
-      return user:openMenu('smelting')
+      return user:openMenu("smelting")
     else
       return vRP.EXT.Base.remote._notify(user.source, "You must be a miner to smelt ores.")
     end
@@ -78,7 +84,7 @@ local function SmeltOres(self)
   end
 end
 function MiningJob:stopSmelting()
-  print('called.')
+  print("called.")
   local user = vRP.users_by_source[source]
   if user then
     return user:closeMenus()
@@ -90,24 +96,35 @@ function MiningJob:__construct()
   vRP.Extension.__construct(self)
   self.cfg = module("vrp_mining", "cfg/cfg")
   self.remote.prepNPCs(self)
-  vRP.EXT.GUI:registerMenuBuilder('rockquarry', function(menu)
-    menu.title = "Rock Quarry"
-    menu.css = {top = "75px", header_color = "rgba(0,125,255,0.75)"}
+  vRP.EXT.GUI:registerMenuBuilder(
+    "rockquarry",
+    function(menu)
+      menu.title = "Rock Quarry"
+      menu.css = {top = "75px", header_color = "rgba(0,125,255,0.75)"}
 
-    menu:addOption('Mine Rock', function(player)
-      return mineRock(self)
-    end)
-  end)
+      menu:addOption(
+        "Mine Rock",
+        function(player)
+          return mineRock(self)
+        end
+      )
+    end
+  )
 
-  vRP.EXT.GUI:registerMenuBuilder('smelting', function(menu)
-    menu.title = 'Processing...'
-    menu.css = {top = "75px", height = '100px', header_color = "rgba(0,125,255,0.75)"}
+  vRP.EXT.GUI:registerMenuBuilder(
+    "smelting",
+    function(menu)
+      menu.title = "Processing..."
+      menu.css = {top = "75px", height = "100px", header_color = "rgba(0,125,255,0.75)"}
 
-    menu:addOption('Process Ore(s)', function(player)
-      return SmeltOres(self)
-    end)
-  end)
+      menu:addOption(
+        "Process Ore(s)",
+        function(player)
+          return SmeltOres(self)
+        end
+      )
+    end
+  )
 end
-
 
 vRP:registerExtension(MiningJob)

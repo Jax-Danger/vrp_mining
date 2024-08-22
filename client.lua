@@ -32,11 +32,11 @@ function MiningJob:prepNPCs(self)
   end
 
   local npc = self.cfg.NPC
-  local ped = GetHashKey('s_m_m_autoshop_01')
+  local ped = GetHashKey("s_m_m_autoshop_01")
   RequestModel(ped)
   while not HasModelLoaded(ped) do
     RequestModel(ped)
-    Citizen.Wait(0)
+    Citizen.Wait(10)
   end
 
   if HasModelLoaded(ped) then
@@ -64,101 +64,113 @@ function MiningJob:__construct()
   self.cfg = module("vrp_mining", "cfg/cfg")
   prepBlips(self)
   -- Rocks mining
-  Citizen.CreateThread(function()
-    local isMining = false
-    local targetRock = nil
+  Citizen.CreateThread(
+    function()
+      local isMining = false
+      local targetRock = nil
 
-    -- Thread for checking distance
-    Citizen.CreateThread(function()
-      while true do
-        Citizen.Wait(500) -- Increased wait time to reduce frequency
-        local plCoords = GetEntityCoords(GetPlayerPed(-1))
-        local closestDistance = math.huge
-        targetRock = nil
+      -- Thread for checking distance
+      Citizen.CreateThread(
+        function()
+          while true do
+            Citizen.Wait(900) -- Increased wait time to reduce frequency
+            local plCoords = GetEntityCoords(GetPlayerPed(-1))
+            local closestDistance = math.huge
+            targetRock = nil
 
-        for k, v in pairs(self.cfg.rocks) do
-          local x, y, z = v[1], v[2], v[3]
-          local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
-          if distance < closestDistance then
-            closestDistance = distance
-            targetRock = v
+            for k, v in pairs(self.cfg.rocks) do
+              local x, y, z = v[1], v[2], v[3]
+              local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
+              if distance < closestDistance then
+                closestDistance = distance
+                targetRock = v
+              end
+            end
+
+            if targetRock and closestDistance <= 1.5 then
+              if not isMining then
+                self.remote.mineRocks()
+                isMining = true
+              end
+            elseif isMining and closestDistance > 1.5 then
+              self.remote.stopMining()
+              isMining = false
+            end
           end
         end
+      )
 
-        if targetRock and closestDistance <= 1.5 then
-          if not isMining then
-            self.remote.mineRocks()
-            isMining = true
-          end
-        elseif isMining and closestDistance > 1.5 then
-          self.remote.stopMining()
-          isMining = false
-        end
-      end
-    end)
+      -- Thread for drawing marker
+      Citizen.CreateThread(
+        function()
+          while true do
+            Citizen.Wait(0)
+            if targetRock then
+              local playerPed = GetPlayerPed(-1)
+              local plCoords = GetEntityCoords(playerPed)
+              local x, y, z = targetRock[1], targetRock[2], targetRock[3]
+              local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
 
-    -- Thread for drawing marker
-    Citizen.CreateThread(function()
-      while true do
-        Citizen.Wait(0)
-        if targetRock then
-          local playerPed = GetPlayerPed(-1)
-          local plCoords = GetEntityCoords(playerPed)
-          local x, y, z = targetRock[1], targetRock[2], targetRock[3]
-          local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
-
-          if distance <= 1.5 then
-            DrawMarker(1, x, y, z-1, 0, 0, 0, 0, 0, 0, 0.75, 0.75, 0.75, 255, 0, 0, 200, 0, 0, 0, 0)
+              if distance <= 1.5 then
+                DrawMarker(1, x, y, z - 1, 0, 0, 0, 0, 0, 0, 0.75, 0.75, 0.75, 255, 0, 0, 200, 0, 0, 0, 0)
+              end
+            end
           end
         end
-      end
-    end)
-  end)
+      )
+    end
+  )
 
   -- Smelting
-  Citizen.CreateThread(function()
-    local isSmelting = false
+  Citizen.CreateThread(
+    function()
+      local isSmelting = false
 
-    -- Thread for checking distance
-    Citizen.CreateThread(function()
-      while true do
-        Citizen.Wait(500) -- Increased wait time to reduce frequency
-        local plCoords = GetEntityCoords(GetPlayerPed(-1))
-        local closestDistance = math.huge
+      -- Thread for checking distance
+      Citizen.CreateThread(
+        function()
+          while true do
+            Citizen.Wait(900) -- Increased wait time to reduce frequency
+            local plCoords = GetEntityCoords(GetPlayerPed(-1))
+            local closestDistance = math.huge
 
-        local x, y, z = table.unpack(self.cfg.smelting.coords)
-        local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
-        if distance < closestDistance then
-          closestDistance = distance
-        end
+            local x, y, z = table.unpack(self.cfg.smelting.coords)
+            local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
+            if distance < closestDistance then
+              closestDistance = distance
+            end
 
-        if closestDistance <= 1.5 then
-          if not isSmelting then
-            self.remote.startSmelting()
-            isSmelting = true
+            if closestDistance <= 1.5 then
+              if not isSmelting then
+                self.remote.startSmelting()
+                isSmelting = true
+              end
+            elseif isSmelting and closestDistance > 1.5 then
+              self.remote.stopSmelting()
+              isSmelting = false
+            end
           end
-        elseif isSmelting and closestDistance > 1.5 then
-          self.remote.stopSmelting()
-          isSmelting = false
         end
-      end
-    end)
+      )
 
-    -- Thread for drawing marker
-    Citizen.CreateThread(function()
-      while true do
-        Citizen.Wait(0)
-        local playerPed = GetPlayerPed(-1)
-        local plCoords = GetEntityCoords(playerPed)
-        local x, y, z = table.unpack(self.cfg.smelting.coords)
-        local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
+      -- Thread for drawing marker
+      Citizen.CreateThread(
+        function()
+          while true do
+            Citizen.Wait(0)
+            local playerPed = GetPlayerPed(-1)
+            local plCoords = GetEntityCoords(playerPed)
+            local x, y, z = table.unpack(self.cfg.smelting.coords)
+            local distance = GetDistanceBetweenCoords(x, y, z, plCoords.x, plCoords.y, plCoords.z, true)
 
-        if distance <= 1.5 then
-          DrawMarker(1, x, y, z-1, 0, 0, 0, 0, 0, 0, 0.75, 0.75, 0.75, 255, 0, 0, 200, 0, 0, 0, 0)
+            if distance <= 1.5 then
+              DrawMarker(1, x, y, z - 1, 0, 0, 0, 0, 0, 0, 0.75, 0.75, 0.75, 255, 0, 0, 200, 0, 0, 0, 0)
+            end
+          end
         end
-      end
-    end)
-  end)
+      )
+    end
+  )
 end
 
 vRP:registerExtension(MiningJob)
